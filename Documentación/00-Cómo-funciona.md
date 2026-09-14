@@ -57,6 +57,11 @@ Lo importante del esquema:
 
 - **`temporadas`** → **`circuitos`** → **`competiciones`** → **`resultados`**. Una competición es un
   archivo importado, o sea un evento de JudoAdministración, o sea **una categoría**.
+- **`temporadas`** es el curso deportivo, de septiembre a agosto. Se da de alta sola al importar el
+  primer archivo que caiga en ella (`Temporadas.Asegurar`, desde la fecha) y también a mano desde
+  ajustes, que es lo que permite preparar el curso siguiente antes de que llegue. La **etiqueta** es
+  la clave real: `EtiquetaDeFecha` la calcula de la fecha del archivo, así que una temporada con
+  cualquier otro formato se quedaría vacía para siempre. De ahí `Temporadas.EtiquetaValida`.
 - **`circuitos`** es el grupo dentro del que se clasifica: el oficial de la federación, el
   extraoficial de iniciación. Una temporada no produce un ranking sino varios, y sumarlos mezclaría
   dos que no se parecen ni en el nivel ni en quién compite. Todo el cálculo pasa **dentro de uno**:
