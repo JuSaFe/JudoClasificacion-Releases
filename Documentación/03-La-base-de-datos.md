@@ -41,6 +41,20 @@ distintas:
 Para el equipo reinstalado, el segundo equipo o la copia restaurada. Se piden servidor, base, usuario
 y la contraseña que se entregó al crearla, y no se toca nada más: los datos están donde estaban.
 
+### Cuando ya hay conexión
+
+La pantalla **no vuelve a pedir nada**. Dice a qué base de datos está conectada —nombre, servidor y
+usuario— y deja seguir. El formulario de los dos caminos solo reaparece si se pulsa **Cambiar de base
+de datos**, que es algo que se hace una vez cada varios años.
+
+Esto no es cosmética: la pantalla se abre también desde ⚙ ▸ Base de datos con la aplicación
+funcionando, y enseñar allí un formulario pidiendo la contraseña del superusuario se lee como que la
+conexión no está hecha.
+
+Y si se llega aquí con la conexión **caída** teniendo configuración guardada —PostgreSQL parado, por
+ejemplo—, la contraseña viene ya puesta: este equipo la tiene en su archivo de configuración, así que
+basta con arrancar el servidor y pulsar «Continuar».
+
 ## La contraseña
 
 La genera la aplicación, no la elige el usuario: 20 caracteres de un alfabeto **sin parecidos** (ni
@@ -83,6 +97,13 @@ Por eso vive en la carpeta de datos del usuario:
 | Windows | `%APPDATA%\JudoClasificacion\conexion.json` |
 | macOS | `~/Library/Application Support/JudoClasificacion/conexion.json` |
 | Linux | `~/.config/JudoClasificacion/conexion.json` |
+
+Al ser **del usuario**, la aplicación tiene que arrancar siempre con la cuenta de quien está delante.
+Por eso el instalador de Windows lanza la aplicación al terminar con la bandera `runasoriginaluser`
+(ver `Empaquetado/windows/JudoClasificacion.iss`): el instalador corre elevado, y sin esa bandera la
+aplicación heredaría la cuenta del administrador que aceptó el aviso de Windows. La configuración se
+guardaría entonces en el perfil de ese administrador y la aplicación volvería a pedir la contraseña
+en cada arranque normal.
 
 ## Copias de seguridad
 
