@@ -129,16 +129,34 @@ presente al tocarlo:
 
 ## 6. Actualizar
 
-`Services/Actualizacion` está portado de JudoAdministración y recortado a lo que aquí hay: **un solo
-paquete**, el de la aplicación (allí hay dos, porque el servicio de servidor se actualiza aparte y se
-puede quedar en otra versión).
+`Services/Actualizacion` está portado de **JudoCombates**, pieza por pieza y con los mismos nombres,
+porque allí funciona y conviene que quien arregle una reconozca la otra:
 
-Lo demás es igual, empezando por lo que no es evidente: un programa no puede sobrescribirse a sí mismo
-mientras se ejecuta, así que `ActualizadorAplicacion` escribe un guion, lo deja lanzado y cierra la
-aplicación; el guion espera a que el proceso muera, sustituye y vuelve a abrirla. El permiso de
-administrador se pide **antes** de cerrar, no después: un diálogo de contraseña que aparece cuando la
-aplicación ya ha desaparecido de la pantalla no se entiende, y si nadie lo contesta el equipo se queda
-sin la versión vieja y sin la nueva.
+| Pieza | De qué se ocupa |
+|---|---|
+| `ServicioActualizacion` | Preguntar a GitHub qué hay publicado y descargarlo. |
+| `Instalacion` | Todo el conocimiento de plataforma: dónde está puesta esta copia, si se puede sustituir, si hace falta permiso y **qué órdenes** hay que dar. |
+| `CarpetaTrabajo` | La carpeta temporal del intento. |
+| `Relevo` | Escribir el guion, lanzarlo (elevado si hace falta) y esperar la señal de que el sistema lo ha autorizado. |
+
+Lo que no es evidente: un programa no puede sobrescribirse a sí mismo mientras se ejecuta, así que
+`Relevo` escribe un guion, lo deja lanzado y cierra la aplicación; el guion espera a que el proceso
+muera, sustituye y vuelve a abrirla. El permiso de administrador se pide **antes** de cerrar, no
+después: un diálogo de contraseña que aparece cuando la aplicación ya ha desaparecido de la pantalla
+no se entiende, y si nadie lo contesta el equipo se queda sin la versión vieja y sin la nueva.
+
+Para poder pedirlo antes hay que saber si se ha dado **sin esperar a que el guion acabe** —no puede
+acabar hasta que nos cerremos, y no nos cerramos hasta saberlo—. De ahí la **marca**: el guion, en su
+primera línea, crea un archivo vacío. Que aparezca significa «el sistema lo ha autorizado y ya está en
+marcha», que es lo único que hace falta saber para cerrarse tranquilo.
+
+Dos cosas que hay que respetar al tocar esto, porque son las que lo tuvieron roto:
+
+- **La carpeta del intento no se borra al terminar.** El guion la usa cuando la aplicación ya se ha
+  cerrado, así que borrarla en un `finally` deja al guion sin el instalador que tenía que aplicar.
+  Quien limpia es el intento siguiente (ver `CarpetaTrabajo`).
+- **El `.dmg` se monta en un punto de montaje propio** (`hdiutil attach -mountpoint`). El punto por
+  omisión sale del *nombre del volumen*, y dar ese nombre por sabido es frágil y ya falló una vez.
 
 Aquí la actualización **no toca la base de datos**, a diferencia de la de JudoAdministración, que
 antes de nada tiene que volcar la del servidor. Las tablas que falten las crea la propia aplicación al
