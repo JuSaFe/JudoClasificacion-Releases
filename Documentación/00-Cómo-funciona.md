@@ -75,6 +75,10 @@ Lo importante del esquema:
   la han puesto.
 - **`resultados.activo`** permite anular un resultado sin borrarlo, con su motivo: es lo que hace
   falta para justificar por qué la clasificación publicada no coincide con el acta.
+- **`competiciones.por_equipos`** marca las que vinieron de un evento por equipos. Sus resultados no
+  están en `resultados` sino en **`resultados_equipos`** (con sus judokas en `miembros_equipo`), y sus
+  jornadas se numeran **aparte** de las individuales de la misma categoría: si no, el ranking
+  individual tendría una columna vacía por cada copa por equipos.
 - **`baremos` + `baremo_reglas` + `competiciones.id_baremo`** es lo que hace que cambiar el baremo no
   reescriba el histórico. Ver el apartado 4.
 
@@ -115,8 +119,8 @@ salen las dos de él, así que no pueden decir cosas distintas.
 Los cuatro pasos están escritos en el comentario de cabecera de esa clase. Lo que conviene tener
 presente al tocarlo:
 
-- **Todo pasa dentro de un circuito.** Las cuatro funciones públicas (`Categorias`, `Jornadas`,
-  `Individual`, `PorClub`) reciben un `idCircuito`, no una temporada: el circuito ya sabe de qué
+- **Todo pasa dentro de un circuito.** Las funciones públicas (`Categorias`, `Jornadas`,
+  `Individual`, `PorClub`, `PorEquipos`) reciben un `idCircuito`, no una temporada: el circuito ya sabe de qué
   temporada es, y pasar las dos cosas solo abriría la puerta a que no casaran. Quien llama resuelve
   el circuito activo con `Circuitos.Activo(conn, idTemporada)`.
 - **El grupo es (categoría, sexo, peso).** El sexo no está dentro de la clave del peso porque no es
@@ -126,6 +130,34 @@ presente al tocarlo:
   descolgado. Las que no cuentan salen igualmente en el informe, en gris y en cursiva: son resultados
   reales y la gente los busca.
 - **Los empates comparten posición** (1, 2, 3, 3, 5…). El nombre solo ordena; no deshace el empate.
+
+### Tres clasificaciones que no se mezclan
+
+| | Individual | Clubes | Equipos |
+|---|---|---|---|
+| De qué competiciones | individuales | individuales | **por equipos** |
+| La tabla | categoría + sexo + peso | una para todo el circuito | categoría + división (+ sexo) |
+| Quién | el judoka (licencia) | el club del judoka | la **agrupación** del equipo |
+| Escala del baremo | `puntos` | `puntos_club` | `puntos_equipo` |
+| Por jornada | su mejor resultado | todo suma | su mejor equipo |
+| Jornadas que suman | las N mejores (o todas) | todas | todas |
+| Columnas extra | — | competiciones | competiciones y mejor puesto |
+
+**Las competiciones por equipos solo cuentan en la de equipos.** En ellas el puesto es del equipo, no
+de cada judoka, así que no hay nada individual que sumar; `Categorias` y `Jornadas` las separan con
+`porEquipos` para que una categoría que solo ha tenido una copa por equipos no salga en el individual
+como una tabla vacía.
+
+**La escala de equipos es una columna más del baremo** (`baremo_reglas.puntos_equipo` y
+`cuenta_equipo`), no una tabla aparte, para que se versione con las otras dos: una competición por
+equipos se queda con el baremo con el que entró, como cualquier otra. No se reutiliza la de clubes
+porque mide otra cosa —lo que aporta un judoka a su club, que de fábrica no puntúa quintos ni
+séptimos—; la de equipos puntúa el puesto de un equipo en su cuadro, que es lo que un judoka en su
+peso, y por eso de partida copia la individual.
+
+**Por jornada, su mejor equipo**: un club que lleva dos equipos a la misma división puntúa una vez,
+como un judoka que compite en dos pesos el mismo día. **Se ordena como el de clubes** —puntos, oros,
+platas, bronces— y los empates comparten posición como en el individual.
 
 ## 6. Actualizar
 

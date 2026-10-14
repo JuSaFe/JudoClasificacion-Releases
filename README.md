@@ -27,8 +27,8 @@
 
 La aplicación que lleva la **clasificación del circuito**: se cargan los archivos de resultados que
 exporta [**JudoAdministración**](https://github.com/JuSaFe/JudoAdministracion-Releases), y con ellos
-sale el ranking de cada categoría, cada sexo y cada peso, más el ranking de clubes y el informe en
-PDF listo para publicar.
+sale el ranking de cada categoría, cada sexo y cada peso, más el ranking de clubes, el de equipos
+de las competiciones por equipos y el informe en PDF listo para publicar.
 
 Cierra el círculo por el otro lado: con la clasificación que hay hasta ese momento numera a los
 inscritos de la **siguiente** competición, y ese archivo se importa de vuelta en JudoAdministración

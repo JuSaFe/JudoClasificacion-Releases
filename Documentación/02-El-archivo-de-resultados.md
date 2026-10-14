@@ -36,6 +36,36 @@ Es el contrato entre JudoAdministración y esta aplicación. Lo escribe
       "Puesto": 1,
       "Descalificado": false
     }
+  ],
+  "PorEquipos": false,
+  "Equipos": []
+}
+```
+
+### Un evento por equipos
+
+```json
+{
+  "Evento": "Liga de Clubes · 1ª jornada",
+  "Categoria": "Senior",
+  "FechaInicio": "2026-10-11",
+  "…": "la misma cabecera",
+  "Ambito": "Autonómico (clubes)",
+  "Resultados": [],
+  "PorEquipos": true,
+  "Equipos": [
+    {
+      "Division": "Masculino",
+      "Sexo": "M",
+      "Equipo": "JUDO CLUB ALICANTE A",
+      "CodAgrupacion": "JCA",
+      "NombreAgrupacion": "JUDO CLUB ALICANTE",
+      "Puesto": 1,
+      "EquiposDivision": 8,
+      "Miembros": [
+        { "Dni": "12345678Z", "IdLicencia": 71633, "Nombre": "Carlos", "Apellidos": "García", "Sexo": "M" }
+      ]
+    }
   ]
 }
 ```
@@ -54,6 +84,29 @@ Es el contrato entre JudoAdministración y esta aplicación. Lo escribe
 - **El peso son tres columnas**: los kilos, `SinLimite` (el peso abierto, el `+`) y `Elite` (la
   variante de los eventos a dos niveles). Aquí se normalizan a una clave, `-46` o `+52`, y de fábrica
   los élite cuentan dentro de su peso normal (ver `Services/Clasificacion/PesoClave`).
+
+## Los eventos por equipos
+
+`PorEquipos` y `Equipos` son **opcionales**: un archivo anterior no los trae, se lee como `false` y
+vacío, y entra exactamente igual que antes.
+
+- **`PorEquipos: true` cambia qué se lee.** En un evento por equipos los puestos son de los equipos,
+  así que `Resultados` viene **vacío a propósito**: ningún judoka tiene puesto individual, y contarlo
+  como participante de un peso falsearía el ranking individual. Si aun así trajera algo, se ignora con
+  un aviso; lo mismo con `Equipos` en un archivo que no está marcado como por equipos.
+- **Cada equipo** trae su `Division` —el «peso» de los equipos: cada una es un cuadro y aquí una tabla
+  aparte—, el `Sexo` de la división (`M`, `W`, o `X` si es mixta), su nombre, la **agrupación** a la
+  que representa (`CodAgrupacion` / `NombreAgrupacion`: club, comunidad o país según `Ambito`; vacías
+  en un combinado), el `Puesto` (nulo si no consiguió ninguno), cuántos equipos había en la división
+  (`EquiposDivision`) y sus `Miembros`.
+- **Se exportan todos los equipos**, con puesto o sin él, por lo mismo que los competidores de un peso.
+- **La identidad es la agrupación**, no el nombre del equipo: «JC Alicante A» en una jornada y «JC
+  Alicante» en la siguiente son el mismo club. Sin agrupación, el nombre del equipo.
+- **Los miembros se guardan pero no cuentan**: el puesto es del equipo. No se dan de alta en
+  `personas`, porque pueden venir sin licencia y el archivo no trae la fecha de nacimiento.
+- Entran en su propia tabla (`resultados_equipos` + `miembros_equipo`) y en su propia clasificación,
+  la de equipos (ver `Clasificador.PorEquipos`); ni el ranking individual ni el de clubes los ven.
+  Reimportar el archivo reemplaza sus equipos igual que reemplaza los resultados individuales.
 
 ## Añadir un campo
 

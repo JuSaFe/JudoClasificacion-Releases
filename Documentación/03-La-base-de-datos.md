@@ -129,15 +129,35 @@ arranque es una migración que se ejecuta sin que nadie la esté mirando.
 
 `BaseDatos.cs` tiene un bloque `Migraciones` que **sí** se ejecuta en cada arranque, con dos
 condiciones: cada orden es **idempotente** (`ADD COLUMN IF NOT EXISTS`) y **no puede perder datos**.
-Hoy tiene una sola:
+Hoy tiene tres:
 
 ```sql
 ALTER TABLE competiciones
     ADD COLUMN IF NOT EXISTS id_circuito INT REFERENCES circuitos(id) ON DELETE CASCADE;
+
+ALTER TABLE competiciones
+    ADD COLUMN IF NOT EXISTS por_equipos BOOLEAN NOT NULL DEFAULT FALSE;
+
+DO $$ BEGIN
+    IF NOT EXISTS (… baremo_reglas.puntos_equipo …) THEN
+        ALTER TABLE baremo_reglas ADD COLUMN puntos_equipo INT     NOT NULL DEFAULT 0;
+        ALTER TABLE baremo_reglas ADD COLUMN cuenta_equipo BOOLEAN NOT NULL DEFAULT TRUE;
+        UPDATE baremo_reglas SET puntos_equipo = puntos, cuenta_equipo = cuenta_individual;
+    END IF;
+END $$;
 ```
 
-Va ahí y no en la lista de «a mano» porque sin esa columna la aplicación no arranca: dejarlo para
+Van ahí y no en la lista de «a mano» porque sin esas columnas la aplicación no arranca: dejarlo para
 después significaría que cualquiera que actualice se encuentra la aplicación rota sin saber por qué.
+
+Las dos últimas son de la **competición por equipos**. `por_equipos` entra a falso, que es lo que
+eran todas las competiciones que ya estaban. Las columnas de equipo del baremo van dentro de un `DO`
+porque la vez que se crean hay que **darles valor** —la escala individual de cada versión, que es la
+que les corresponde de partida—, y un `UPDATE` suelto se repetiría en cada arranque pisando lo que se
+hubiera editado después. Dentro del `IF` solo corre una vez.
+
+Las tablas nuevas de los equipos, `resultados_equipos` y `miembros_equipo`, no necesitan nada de esto:
+son `CREATE TABLE IF NOT EXISTS` y se crean solas.
 
 Detrás corre `AdoptarCompeticionesSueltas`, que mete en el circuito por defecto de su temporada
 —creándolo si no está— las competiciones que se importaron antes de que existieran los circuitos. El
