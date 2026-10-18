@@ -36,6 +36,27 @@ distintas:
 
 4. Se guarda la configuración de este equipo y **se enseña la contraseña generada**.
 
+### En el servidor de JudoAdministración (PostgreSQL cerrado)
+
+Desde la 1.0.0.57 de JudoAdministración, el PostgreSQL del servidor queda **cerrado con la
+licencia**: la contraseña de `postgres` la genera la licencia y no la conoce nadie, ni quien tiene el
+equipo. Desde aquí no se puede crear la base, porque no hay contraseña de superusuario que escribir.
+
+La crea **JudoAdministración**: en su pantalla de inicio, **Configuración ▸ Actualización ▸ Preparar
+la base de datos de JudoClasificación**. Hace lo mismo que el camino de arriba —rol
+`judoclasificacion` sin más permisos que entrar, base suya, prueba de que se puede entrar— con la
+contraseña de `postgres` que saca de la licencia, y además **deja escrito el `conexion.json` de esta
+aplicación**. Enseña la contraseña generada para guardarla, igual que aquí.
+
+Después basta con abrir JudoClasificación (o, si estaba abierta en esta pantalla, pulsar
+**Comprobar**, que recoge la conexión guardada). La pantalla avisa de este camino cuando encuentra la
+licencia de JudoAdministración en el equipo (`JudoAdministracion/licencia.json` en la carpeta de datos
+del usuario) y cuando la contraseña del superusuario no entra. Es un aviso y no un veto: un servidor
+con licencia de antes del cierre sigue teniendo la contraseña que se puso al instalar PostgreSQL.
+
+El rol nuevo no es superusuario, así que ni el cierre ni la vigilancia de JudoAdministración lo
+tocan, y `pg_hba.conf` ya admite contraseña desde el propio equipo, que es por donde entra.
+
 ### Ya tengo una
 
 Para el equipo reinstalado, el segundo equipo o la copia restaurada. Se piden servidor, base, usuario
@@ -79,7 +100,8 @@ Cifrarla con una clave que tendría que estar también en el equipo no añadirí
 No se puede recuperar: PostgreSQL no la guarda, guarda su hash. Lo que sí se puede es **reponerla**,
 volviendo a ejecutar «Crear la base de datos» con el mismo nombre: el rol ya existe y se le pone una
 contraseña nueva (`ALTER ROLE`), la base ya existe y se conserva con todos sus datos, y se entrega la
-contraseña nueva. Hace falta, otra vez, la del superusuario.
+contraseña nueva. Hace falta, otra vez, la del superusuario; en un servidor cerrado, el mismo botón
+de JudoAdministración la repone.
 
 ## Por qué la configuración no va junto al ejecutable
 
