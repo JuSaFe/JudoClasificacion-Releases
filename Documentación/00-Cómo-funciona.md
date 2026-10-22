@@ -35,6 +35,7 @@ Services/
   Pdf/           El informe, con QuestPDF.
 ViewModels/      Una por pantalla. CommunityToolkit.Mvvm.
 Views/           Su XAML. Las empareja ViewLocator por el nombre.
+Idiomas/         Los textos de la interfaz en cada idioma (ver el apartado 7).
 ```
 
 ## 3. La base de datos
@@ -194,7 +195,28 @@ Aquí la actualización **no toca la base de datos**, a diferencia de la de Judo
 antes de nada tiene que volcar la del servidor. Las tablas que falten las crea la propia aplicación al
 arrancar.
 
-## 7. Lo que no está hecho
+## 7. Idiomas
+
+La interfaz y el PDF salen en español, inglés, francés o alemán (estos dos, en beta), con la misma
+solución que JudoAdministración (su `Documentación/06-Internacionalizacion.md`, y su
+`Herramientas/i18n/glosario.md` para los términos):
+
+- Los textos están en `Idiomas/Textos.resx` (español, el neutro) y `Idiomas/Textos.<idioma>.resx`
+  (`en`, `fr`, `de`). La clase
+  `Textos` la genera MSBuild: una clave que no exista no compila, tampoco en el XAML
+  (`{x:Static i:Textos.Clave}`).
+- **Se elige por equipo** en el engranaje ▸ Idioma, se guarda en `idioma.json` junto a
+  `conexion.json` y se aplica al arrancar: elegir otro ofrece reiniciar (`Services/Sistema/Aplicacion`).
+- **Dos culturas**: la de la interfaz es la elegida; la de los datos (fechas, decimales, el orden de
+  los nombres) es siempre es-ES (`Configuracion/CulturaAplicacion`).
+- **Lo que es dato no se traduce**: categorías, etiquetas del baremo, divisiones, nombres de circuito
+  y de temporada se guardan en español. Las categorías y las etiquetas de fábrica del baremo se
+  traducen solo al enseñarlas (`Idiomas/TextoVisible`).
+- Para añadir textos: un lote JSON en `Herramientas/i18n/lotes/` y `textos.py anadir` (o
+  `extraer_cs.py` / `extraer_axaml.py`, que además cambian el código). En Debug hay un pseudo-idioma
+  (`[Ƥšéûðö]`) que deja ver lo que se ha quedado sin extraer; `textos.py comprobar` lo cuenta.
+
+## 8. Lo que no está hecho
 
 - **Control de licencias.** La licencia de esta aplicación (LICENSE) concede el uso gratuito e
   ilimitado, como la de JudoCombates, así que no hay nada que comprobar. Si algún día se decide
